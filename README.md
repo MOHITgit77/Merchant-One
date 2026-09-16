@@ -2,7 +2,7 @@
 
 Merchant One is a modern, full-stack merchant management platform designed to streamline store setup, catalogue management, inventory tracking, and sales processing.
 
-## 🚀 Features
+## Features
 
 - **Store Management**: Easily configure store details, operating hours, delivery settings, and payment preferences.
 - **Product Catalogue**: Manage products, variants, pricing, and stock levels effortlessly.
@@ -10,13 +10,13 @@ Merchant One is a modern, full-stack merchant management platform designed to st
 - **Sales & POS**: Process new sales seamlessly with real-time inventory updates and receipt generation.
 - **Dynamic Dashboard**: View daily revenue, recent sales, and low-stock alerts at a glance.
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 - **Frontend**: React 19, TypeScript, Vite, React Router, React Hook Form, Zod
 - **Backend**: Java 21, Spring Boot 3, Spring Security (JWT), Hibernate/JPA, PostgreSQL
 - **Infrastructure**: Docker, Docker Compose, Flyway Database Migrations
 
-## 📦 Getting Started (Local Development)
+## Getting Started (Local Development)
 
 The easiest way to run the entire application locally is using Docker Compose. This will spin up the PostgreSQL database, the Spring Boot backend API, and the React frontend.
 
@@ -46,7 +46,7 @@ The easiest way to run the entire application locally is using Docker Compose. T
    docker compose down
    ```
 
-## 🧪 Testing
+## Testing
 
 To run the automated backend test suite, use the Maven wrapper:
 ```bash
@@ -54,6 +54,6 @@ cd backend
 ./mvnw clean test
 ```
 
-## 📝 License
+## License
 
 Copyright © 2026. All rights reserved.
