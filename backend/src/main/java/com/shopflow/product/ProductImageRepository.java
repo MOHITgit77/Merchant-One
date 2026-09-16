@@ -1,0 +1,10 @@
+package com.shopflow.product;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
+import java.util.UUID;
+
+public interface ProductImageRepository extends JpaRepository<ProductImage, UUID> {
+    List<ProductImage> findByProductIdOrderByDisplayOrder(UUID productId);
+    int countByProductId(UUID productId);
+}
