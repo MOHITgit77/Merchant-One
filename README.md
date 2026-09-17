@@ -56,6 +56,27 @@ cd backend
 ./mvnw clean test
 ```
 
+## Environment Configuration
+
+A sample environment configuration is provided in `.env.example`. 
+Copy it to `.env` and configure your local variables before running docker-compose:
+```bash
+cp .env.example .env
+```
+
+## API Documentation
+
+- **Storefront API Documentation:** The customer-facing API contracts are documented in [docs/Storefront_API.md](./docs/Storefront_API.md).
+- **Merchant REST API:** Interactive Swagger documentation is available at `http://localhost:8080/swagger-ui.html` when the backend is running.
+
+## Main Merchant Workflows
+
+1. **Store Setup:** Register, create a store profile, and configure hours, delivery, and payments.
+2. **Catalog Management:** Create categories, add products, variants, and pricing.
+3. **Inventory Management:** Stock in items, manage purchase batches, and track stock ledger.
+4. **Order Management:** Accept customer orders, reserve stock, and process them through to completion.
+5. **Direct Sales (POS):** Process in-store sales and print invoices.
+
 ## License
 
 Copyright © 2026. All rights reserved.

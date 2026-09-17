@@ -111,3 +111,15 @@ export const storefrontApi = {
   getCategories: (slug: string) => api.get(`/api/storefront/${slug}/categories`),
   getProducts: (slug: string, params?: any) => api.get(`/api/storefront/${slug}/products`, { params }),
 };
+
+// ========== Orders API ==========
+export const ordersApi = {
+  list: (storeId: string, params?: any) => api.get(`/api/stores/${storeId}/orders`, { params }),
+  get: (storeId: string, id: string) => api.get(`/api/stores/${storeId}/orders/${id}`),
+  accept: (storeId: string, id: string) => api.patch(`/api/stores/${storeId}/orders/${id}/accept`),
+  reject: (storeId: string, id: string, data?: { reason: string }) => api.patch(`/api/stores/${storeId}/orders/${id}/reject`, data),
+  updateStatus: (storeId: string, id: string, data: { status: string }) => api.patch(`/api/stores/${storeId}/orders/${id}/status`, data),
+  complete: (storeId: string, id: string) => api.patch(`/api/stores/${storeId}/orders/${id}/complete`),
+  cancel: (storeId: string, id: string, data?: { reason: string }) => api.patch(`/api/stores/${storeId}/orders/${id}/cancel`, data),
+};
+

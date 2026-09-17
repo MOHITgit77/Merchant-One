@@ -18,6 +18,7 @@ import PurchasesPage from './features/purchases/PurchasesPage';
 import BatchesPage from './features/batches/BatchesPage';
 import NewSalePage from './features/sales/NewSalePage';
 import SalesHistoryPage from './features/sales/SalesHistoryPage';
+import OrdersPage from './features/orders/OrdersPage';
 import StorefrontPage from './features/storefront/StorefrontPage';
 
 const queryClient = new QueryClient({
@@ -88,6 +89,8 @@ export default function App() {
                   {/* Purchases & Batches */}
                   <Route path="purchases" element={<PurchasesPage />} />
                   <Route path="batches" element={<BatchesPage />} />
+                  {/* Orders */}
+                  <Route path="orders" element={<OrdersPage />} />
                   {/* Sales */}
                   <Route path="sales/new" element={<NewSalePage />} />
                   <Route path="sales" element={<SalesHistoryPage />} />

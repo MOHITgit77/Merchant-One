@@ -55,6 +55,7 @@ const navGroups: NavGroup[] = [
   {
     label: 'Sales',
     items: [
+      { label: 'Orders', path: '/orders', icon: <IconPackage size={16} /> },
       { label: 'New Sale', path: '/sales/new', icon: <IconPlus size={16} /> },
       { label: 'Sales History', path: '/sales', icon: <IconTrendingUp size={16} /> },
     ],
