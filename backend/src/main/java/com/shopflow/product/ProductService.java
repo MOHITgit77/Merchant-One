@@ -84,7 +84,6 @@ public class ProductService {
             defaultVariant.setCostPrice(product.getCostPrice());
             defaultVariant.setDisplayOrder(0);
             product.getVariants().add(defaultVariant);
-            variantRepository.save(defaultVariant);
         }
 
         log.info("Product created: {} in store {}", product.getName(), storeId);
@@ -185,7 +184,7 @@ public class ProductService {
             cv.setCostPrice(sv.getCostPrice());
             cv.setDisplayOrder(sv.getDisplayOrder());
             cv.setBarcode(null);
-            variantRepository.save(cv);
+            copy.getVariants().add(cv);
         }
 
         return toDto(copy);
@@ -238,7 +237,7 @@ public class ProductService {
         variant.setBarcode(vr.getBarcode());
         variant.setWeight(vr.getWeight());
         variant.setDisplayOrder(order);
-        variantRepository.save(variant);
+        product.getVariants().add(variant);
     }
 
     String generateSku(String base) {

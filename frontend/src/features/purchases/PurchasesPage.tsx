@@ -129,7 +129,9 @@ function NewPurchaseModal({ storeId, onClose, onSuccess }: { storeId: string; on
               <div className="input-wrapper"><label className="input-label">Supplier Contact</label><input className="input-field" value={supplierContact} onChange={e => setSupplierContact(e.target.value)} /></div>
             </div>
             <div className="form-section-title">Items</div>
-            {items.map((item, i) => (
+            {items.map((item, i) => {
+              const lineTotal = (parseFloat(item.quantity) || 0) * (parseFloat(item.unitCost) || 0);
+              return (
               <div key={i} style={{ display: 'flex', gap: 'var(--space-2)', alignItems: 'flex-end', flexWrap: 'wrap', padding: 'var(--space-3)', background: 'var(--color-bg-secondary)', borderRadius: 'var(--radius-lg)' }}>
                 <div className="input-wrapper" style={{ flex: 2, minWidth: 180 }}>
                   <label className="input-label">Product *</label>
@@ -140,12 +142,19 @@ function NewPurchaseModal({ storeId, onClose, onSuccess }: { storeId: string; on
                 </div>
                 <div className="input-wrapper" style={{ width: 70 }}><label className="input-label">Qty *</label><input type="number" min="1" className="input-field" required value={item.quantity} onChange={e => updateItem(i, 'quantity', e.target.value)} /></div>
                 <div className="input-wrapper" style={{ width: 90 }}><label className="input-label">Cost (₹) *</label><input type="number" step="0.01" min="0" className="input-field" required value={item.unitCost} onChange={e => updateItem(i, 'unitCost', e.target.value)} /></div>
+                <div className="input-wrapper" style={{ width: 100 }}><label className="input-label">Total (₹)</label><div className="input-field" style={{ background: 'var(--color-bg-tertiary, #e9ecef)', fontWeight: 'var(--font-semibold)', display: 'flex', alignItems: 'center', color: lineTotal > 0 ? 'var(--color-success, #16a34a)' : undefined }}>₹{lineTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div></div>
                 <div className="input-wrapper" style={{ width: 100 }}><label className="input-label">Batch #</label><input className="input-field" value={item.batchNumber} onChange={e => updateItem(i, 'batchNumber', e.target.value)} /></div>
                 <div className="input-wrapper" style={{ width: 130 }}><label className="input-label">Expiry</label><input type="date" className="input-field" value={item.expiryDate} onChange={e => updateItem(i, 'expiryDate', e.target.value)} /></div>
                 {items.length > 1 && <button type="button" className="btn btn-ghost btn-sm" onClick={() => removeItem(i)} style={{ color: 'var(--color-danger)' }}><IconX size={14} /></button>}
               </div>
-            ))}
-            <button type="button" className="btn btn-secondary btn-sm" onClick={addItem} style={{ alignSelf: 'flex-start' }}><IconPlus size={14} /> Add Item</button>
+              );
+            })}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <button type="button" className="btn btn-secondary btn-sm" onClick={addItem}><IconPlus size={14} /> Add Item</button>
+              <div style={{ fontWeight: 'var(--font-bold)', fontSize: 'var(--text-base)' }}>
+                Grand Total: <span style={{ color: 'var(--color-success, #16a34a)' }}>₹{items.reduce((sum, item) => sum + (parseFloat(item.quantity) || 0) * (parseFloat(item.unitCost) || 0), 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+              </div>
+            </div>
             <div className="input-wrapper"><label className="input-label">Notes</label><textarea className="input-field textarea-field" value={notes} onChange={e => setNotes(e.target.value)} /></div>
           </div>
           <div className="dialog-footer">

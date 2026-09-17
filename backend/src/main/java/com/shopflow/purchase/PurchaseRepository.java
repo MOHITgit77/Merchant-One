@@ -14,4 +14,7 @@ public interface PurchaseRepository extends JpaRepository<Purchase, UUID> {
 
     @Query("SELECT COALESCE(MAX(CAST(SUBSTRING(p.purchaseNumber, 4) AS int)), 0) FROM Purchase p WHERE p.storeId = :storeId")
     int findMaxPurchaseNumber(@Param("storeId") UUID storeId);
+
+    @Query("SELECT COALESCE(MAX(CAST(SUBSTRING(p.purchaseNumber, 4) AS int)), 0) FROM Purchase p")
+    int findMaxPurchaseNumberGlobal();
 }

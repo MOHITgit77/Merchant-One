@@ -68,7 +68,8 @@ public class InventoryService {
         variant.setQuantityOnHand(before - request.getQuantity());
         variantRepository.save(variant);
 
-        InventoryLedger entry = createLedgerEntry(storeId, variant.getId(), MovementType.STOCK_OUT,
+        MovementType moveType = request.getType() != null ? request.getType() : MovementType.STOCK_OUT;
+        InventoryLedger entry = createLedgerEntry(storeId, variant.getId(), moveType,
                 -request.getQuantity(), before, variant.getQuantityOnHand(),
                 request.getUnitCost(), request.getNotes(),
                 request.getReferenceType(), request.getReferenceId(), merchantId);
@@ -88,7 +89,8 @@ public class InventoryService {
         variant.setQuantityOnHand(request.getNewQuantity());
         variantRepository.save(variant);
 
-        InventoryLedger entry = createLedgerEntry(storeId, variant.getId(), MovementType.ADJUSTMENT,
+        MovementType moveType = request.getType() != null ? request.getType() : MovementType.ADJUSTMENT;
+        InventoryLedger entry = createLedgerEntry(storeId, variant.getId(), moveType,
                 delta, before, request.getNewQuantity(), null,
                 request.getReason(), null, null, merchantId);
 

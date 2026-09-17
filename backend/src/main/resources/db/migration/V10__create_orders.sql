@@ -63,7 +63,8 @@ CREATE TABLE order_items (
     tax_amount      NUMERIC(12,2) NOT NULL DEFAULT 0,
     line_total      NUMERIC(12,2) NOT NULL,
 
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- Indexes for performance

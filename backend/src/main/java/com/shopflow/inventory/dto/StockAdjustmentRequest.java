@@ -12,6 +12,7 @@ public class StockAdjustmentRequest {
     private int newQuantity;
 
     private String reason;
+    private com.shopflow.inventory.MovementType type;
 
     public UUID getVariantId() { return variantId; }
     public void setVariantId(UUID variantId) { this.variantId = variantId; }
@@ -19,4 +20,6 @@ public class StockAdjustmentRequest {
     public void setNewQuantity(int newQuantity) { this.newQuantity = newQuantity; }
     public String getReason() { return reason; }
     public void setReason(String reason) { this.reason = reason; }
+    public com.shopflow.inventory.MovementType getType() { return type; }
+    public void setType(com.shopflow.inventory.MovementType type) { this.type = type; }
 }

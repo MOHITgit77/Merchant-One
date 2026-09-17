@@ -140,7 +140,7 @@ function CreateStoreView() {
   return (
     <div>
       <div className="page-header"><div><h1 className="page-title">Create Your Store</h1><p className="page-subtitle">Set up your store to start selling</p></div></div>
-      <div className="card" style={{ maxWidth: 600 }}>
+      <div className="card">
         <form onSubmit={handleSubmit} className="form-grid">
           <div className="input-wrapper">
             <label className="input-label" htmlFor="storeName">Store Name *</label>

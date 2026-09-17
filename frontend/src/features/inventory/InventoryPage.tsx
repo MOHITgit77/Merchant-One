@@ -10,7 +10,6 @@ export default function InventoryPage() {
   const { activeStoreId } = useActiveStore();
   const { showToast } = useToast();
   const queryClient = useQueryClient();
-  const [showStockIn, setShowStockIn] = useState(false);
   const [showStockOut, setShowStockOut] = useState(false);
   const [showAdjust, setShowAdjust] = useState(false);
 
@@ -46,7 +45,6 @@ export default function InventoryPage() {
           <p className="page-subtitle">{allVariants.length} SKUs tracked</p>
         </div>
         <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
-          <button className="btn btn-success" onClick={() => setShowStockIn(true)}><IconPlus size={16} /> Stock In</button>
           <button className="btn btn-secondary" onClick={() => setShowStockOut(true)}><IconMinus size={16} /> Stock Out</button>
           <button className="btn btn-secondary" onClick={() => setShowAdjust(true)}><IconRefresh size={16} /> Adjust</button>
         </div>
@@ -91,7 +89,6 @@ export default function InventoryPage() {
         </div>
       )}
 
-      {showStockIn && <StockModal type="in" storeId={activeStoreId!} variants={allVariants} onClose={() => setShowStockIn(false)} onSuccess={() => { setShowStockIn(false); refresh(); }} />}
       {showStockOut && <StockModal type="out" storeId={activeStoreId!} variants={allVariants} onClose={() => setShowStockOut(false)} onSuccess={() => { setShowStockOut(false); refresh(); }} />}
       {showAdjust && <AdjustModal storeId={activeStoreId!} variants={allVariants} onClose={() => setShowAdjust(false)} onSuccess={() => { setShowAdjust(false); refresh(); }} />}
     </div>
@@ -103,6 +100,7 @@ function StockModal({ type, storeId, variants, onClose, onSuccess }: { type: 'in
   const [variantId, setVariantId] = useState('');
   const [quantity, setQuantity] = useState('');
   const [unitCost, setUnitCost] = useState('');
+  const [movementType, setMovementType] = useState('STOCK_OUT');
   const [notes, setNotes] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
@@ -110,7 +108,9 @@ function StockModal({ type, storeId, variants, onClose, onSuccess }: { type: 'in
     e.preventDefault();
     setIsSaving(true);
     try {
-      const payload = { variantId, quantity: parseInt(quantity), unitCost: unitCost ? parseFloat(unitCost) : undefined, notes: notes || undefined };
+      const payload: any = { variantId, quantity: parseInt(quantity), unitCost: unitCost ? parseFloat(unitCost) : undefined, notes: notes || undefined };
+      if (type === 'out') payload.type = movementType;
+      
       if (type === 'in') await inventoryApi.stockIn(storeId, payload);
       else await inventoryApi.stockOut(storeId, payload);
       showToast(`Stock ${type === 'in' ? 'added' : 'removed'} successfully`, 'success');
@@ -134,6 +134,16 @@ function StockModal({ type, storeId, variants, onClose, onSuccess }: { type: 'in
             <div className="form-row">
               <div className="input-wrapper"><label className="input-label">Quantity *</label><input type="number" min="1" className="input-field" required value={quantity} onChange={e => setQuantity(e.target.value)} /></div>
               {type === 'in' && <div className="input-wrapper"><label className="input-label">Unit Cost (₹)</label><input type="number" step="0.01" min="0" className="input-field" value={unitCost} onChange={e => setUnitCost(e.target.value)} /></div>}
+              {type === 'out' && (
+                <div className="input-wrapper">
+                  <label className="input-label">Type *</label>
+                  <select className="input-field select-field" required value={movementType} onChange={e => setMovementType(e.target.value)}>
+                    <option value="STOCK_OUT">General Stock Out</option>
+                    <option value="DAMAGE">Damage</option>
+                    <option value="EXPIRY">Expiry</option>
+                  </select>
+                </div>
+              )}
             </div>
             <div className="input-wrapper"><label className="input-label">Notes</label><textarea className="input-field textarea-field" value={notes} onChange={e => setNotes(e.target.value)} /></div>
           </div>
@@ -151,6 +161,7 @@ function AdjustModal({ storeId, variants, onClose, onSuccess }: { storeId: strin
   const { showToast } = useToast();
   const [variantId, setVariantId] = useState('');
   const [newQuantity, setNewQuantity] = useState('');
+  const [movementType, setMovementType] = useState('ADJUSTMENT');
   const [reason, setReason] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const selectedVariant = variants.find((v: any) => v.id === variantId);
@@ -159,7 +170,7 @@ function AdjustModal({ storeId, variants, onClose, onSuccess }: { storeId: strin
     e.preventDefault();
     setIsSaving(true);
     try {
-      await inventoryApi.adjust(storeId, { variantId, newQuantity: parseInt(newQuantity), reason });
+      await inventoryApi.adjust(storeId, { variantId, newQuantity: parseInt(newQuantity), type: movementType, reason });
       showToast('Stock adjusted', 'success');
       onSuccess();
     } catch (err: any) { showToast(err.response?.data?.error?.message || 'Adjustment failed', 'error'); }
@@ -179,7 +190,17 @@ function AdjustModal({ storeId, variants, onClose, onSuccess }: { storeId: strin
               </select>
             </div>
             {selectedVariant && <div className="badge badge-neutral" style={{ alignSelf: 'flex-start' }}>Current stock: {selectedVariant.quantityOnHand}</div>}
-            <div className="input-wrapper"><label className="input-label">New Quantity *</label><input type="number" min="0" className="input-field" required value={newQuantity} onChange={e => setNewQuantity(e.target.value)} /></div>
+            <div className="form-row">
+              <div className="input-wrapper"><label className="input-label">New Quantity *</label><input type="number" min="0" className="input-field" required value={newQuantity} onChange={e => setNewQuantity(e.target.value)} /></div>
+              <div className="input-wrapper">
+                <label className="input-label">Type *</label>
+                <select className="input-field select-field" required value={movementType} onChange={e => setMovementType(e.target.value)}>
+                  <option value="ADJUSTMENT">General Adjustment</option>
+                  <option value="DAMAGE">Damage</option>
+                  <option value="EXPIRY">Expiry</option>
+                </select>
+              </div>
+            </div>
             <div className="input-wrapper"><label className="input-label">Reason *</label><textarea className="input-field textarea-field" required value={reason} onChange={e => setReason(e.target.value)} placeholder="Why is the stock being adjusted?" /></div>
           </div>
           <div className="dialog-footer">

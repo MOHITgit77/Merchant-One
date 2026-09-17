@@ -16,6 +16,7 @@ public class StockMovementRequest {
     private String notes;
     private String referenceType;
     private UUID referenceId;
+    private com.shopflow.inventory.MovementType type;
 
     public UUID getVariantId() { return variantId; }
     public void setVariantId(UUID variantId) { this.variantId = variantId; }
@@ -29,4 +30,6 @@ public class StockMovementRequest {
     public void setReferenceType(String referenceType) { this.referenceType = referenceType; }
     public UUID getReferenceId() { return referenceId; }
     public void setReferenceId(UUID referenceId) { this.referenceId = referenceId; }
+    public com.shopflow.inventory.MovementType getType() { return type; }
+    public void setType(com.shopflow.inventory.MovementType type) { this.type = type; }
 }

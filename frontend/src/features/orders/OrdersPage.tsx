@@ -92,7 +92,12 @@ export default function OrdersPage() {
               </thead>
               <tbody>
                 {orders.map((o: any) => (
-                  <tr key={o.id}>
+                  <tr 
+                    key={o.id} 
+                    onClick={() => setViewOrder(o)}
+                    style={{ cursor: 'pointer' }}
+                    className="hoverable-row"
+                  >
                     <td style={{ fontWeight: 'var(--font-semibold)' }}>{o.orderNumber}</td>
                     <td style={{ fontSize: 'var(--text-xs)', whiteSpace: 'nowrap' }}>
                       {new Date(o.createdAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
@@ -110,9 +115,13 @@ export default function OrdersPage() {
                     <td style={{ fontWeight: 'var(--font-bold)', whiteSpace: 'nowrap' }}>
                       ₹{Number(o.totalAmount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                     </td>
-                    <td>
-                      <button className="btn btn-ghost btn-sm" onClick={() => setViewOrder(o)}>
-                        <IconEye size={14} />
+                    <td style={{ textAlign: 'right' }}>
+                      <button 
+                        className="btn btn-secondary btn-sm" 
+                        onClick={(e) => { e.stopPropagation(); setViewOrder(o); }}
+                        style={{ padding: '4px 12px' }}
+                      >
+                        View Details
                       </button>
                     </td>
                   </tr>

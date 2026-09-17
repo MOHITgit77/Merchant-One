@@ -84,8 +84,8 @@ public class OrderService {
                         "Insufficient stock for " + variant.getName() + ". Available: " + available);
             }
 
-            BigDecimal itemPrice = variant.getPrice();
-            BigDecimal itemTaxPercent = product.getTaxPercent();
+            BigDecimal itemPrice = variant.getPrice() != null ? variant.getPrice() : BigDecimal.ZERO;
+            BigDecimal itemTaxPercent = product.getTaxPercent() != null ? product.getTaxPercent() : BigDecimal.ZERO;
             BigDecimal itemLineTotal = itemPrice.multiply(BigDecimal.valueOf(itemReq.getQuantity()));
             BigDecimal itemTaxAmount = itemLineTotal.multiply(itemTaxPercent).divide(BigDecimal.valueOf(100), 2, java.math.RoundingMode.HALF_UP);
 

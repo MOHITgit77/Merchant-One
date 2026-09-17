@@ -140,7 +140,9 @@ public class SalesService {
     }
 
     private String generateInvoiceNumber(UUID storeId) {
-        int max = saleRepository.findMaxInvoiceNumber(storeId);
+        int maxGlobal = saleRepository.findMaxInvoiceNumberGlobal();
+        int maxStore = saleRepository.findMaxInvoiceNumber(storeId);
+        int max = Math.max(maxGlobal, maxStore);
         return "INV-" + String.format("%06d", max + 1);
     }
 

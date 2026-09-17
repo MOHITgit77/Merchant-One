@@ -110,6 +110,7 @@ export const storefrontApi = {
   getStore: (slug: string) => api.get(`/api/storefront/${slug}`),
   getCategories: (slug: string) => api.get(`/api/storefront/${slug}/categories`),
   getProducts: (slug: string, params?: any) => api.get(`/api/storefront/${slug}/products`, { params }),
+  placeOrder: (slug: string, data: any) => api.post(`/api/storefront/${slug}/orders`, data),
 };
 
 // ========== Orders API ==========

@@ -29,7 +29,7 @@ services:
       DATABASE_PASSWORD: shopflow
       JWT_SECRET: shopflow-dev-secret-key-that-is-at-least-256-bits-long-for-hs256-algo
       FILE_STORAGE_LOCATION: /app/uploads
-      CORS_ORIGINS: http://localhost:5174
+      CORS_ORIGINS: http://localhost:5175
     volumes:
       - uploads:/app/uploads
     depends_on:
@@ -42,7 +42,7 @@ services:
       dockerfile: Dockerfile
     container_name: shopflow-frontend
     ports:
-      - "5174:80"
+      - "5175:80"
     depends_on:
       - backend
 

@@ -56,10 +56,6 @@ public class PurchaseService {
         purchase.setPurchaseDate(request.getPurchaseDate() != null ? request.getPurchaseDate() : LocalDate.now());
         purchase.setNotes(request.getNotes());
         purchase.setPerformedBy(merchantId);
-        purchase.setTotalAmount(BigDecimal.ZERO); // Temporary, updated below
-
-        // Save purchase first to get the ID for batch linkage
-        purchase = purchaseRepository.save(purchase);
 
         BigDecimal totalAmount = BigDecimal.ZERO;
 
@@ -88,16 +84,27 @@ public class PurchaseService {
 
             purchase.getItems().add(item);
             totalAmount = totalAmount.add(lineTotal);
+        }
+
+        purchase.setTotalAmount(totalAmount);
+
+        // Save purchase and all items in one go via cascade (avoids double-save batch conflict)
+        purchase = purchaseRepository.save(purchase);
+
+        // Now that purchase is persisted, perform stock-in and batch operations
+        for (int idx = 0; idx < request.getItems().size(); idx++) {
+            CreatePurchaseRequest.PurchaseItemRequest itemReq = request.getItems().get(idx);
+            PurchaseItem savedItem = purchase.getItems().get(idx);
 
             // Stock in via inventory service with PURCHASE movement type
-            inventoryService.stockInForPurchase(storeId, variant.getId(), itemReq.getQuantity(),
+            inventoryService.stockInForPurchase(storeId, savedItem.getVariantId(), itemReq.getQuantity(),
                     itemReq.getUnitCost(), purchase.getId(), merchantId);
 
-            // Create batch record if batch number provided — now with purchaseId
+            // Create batch record if batch number provided
             if (itemReq.getBatchNumber() != null && !itemReq.getBatchNumber().isBlank()) {
                 Batch batch = new Batch();
                 batch.setStoreId(storeId);
-                batch.setVariantId(variant.getId());
+                batch.setVariantId(savedItem.getVariantId());
                 batch.setPurchaseId(purchase.getId());
                 batch.setBatchNumber(itemReq.getBatchNumber());
                 batch.setQuantity(itemReq.getQuantity());
@@ -108,9 +115,6 @@ public class PurchaseService {
                 batchRepository.save(batch);
             }
         }
-
-        purchase.setTotalAmount(totalAmount);
-        purchase = purchaseRepository.save(purchase);
 
         log.info("Purchase created: {} (₹{}) in store {}", purchase.getPurchaseNumber(), totalAmount, storeId);
         return toDto(purchase);
@@ -145,7 +149,9 @@ public class PurchaseService {
     }
 
     private String generatePurchaseNumber(UUID storeId) {
-        int max = purchaseRepository.findMaxPurchaseNumber(storeId);
+        int maxGlobal = purchaseRepository.findMaxPurchaseNumberGlobal();
+        int maxStore = purchaseRepository.findMaxPurchaseNumber(storeId);
+        int max = Math.max(maxGlobal, maxStore);
         return "PO-" + String.format("%06d", max + 1);
     }
 

@@ -4,13 +4,14 @@ import { useAuth } from '../../hooks/useAuth';
 import { useActiveStore } from '../../hooks/useStore';
 import { dashboardApi, storeApi } from '../../api/endpoints';
 import { IconStore, IconTrendingUp, IconPackage, IconAlertTriangle, IconPlus, IconClipboard, IconCart, IconExternalLink, IconGlobe } from '../../components/icons/Icons';
+import { Navigate } from 'react-router-dom';
 import './Dashboard.css';
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const { activeStoreId, setActiveStoreId } = useActiveStore();
 
-  const { data: storesRes } = useQuery({ queryKey: ['stores'], queryFn: () => storeApi.list() });
+  const { data: storesRes, isLoading: loadingStores } = useQuery({ queryKey: ['stores'], queryFn: () => storeApi.list() });
   const stores = storesRes?.data?.data || [];
 
   useEffect(() => {
@@ -32,21 +33,17 @@ export default function DashboardPage() {
     return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
   };
 
+  // If we finished loading stores and the user has none, redirect to store creation
+  if (!loadingStores && stores.length === 0) {
+    return <Navigate to="/store/new" replace />;
+  }
+
+  // Fallback while loading
   if (!activeStoreId) {
     return (
       <div className="dashboard">
-        <div className="dashboard-empty">
-          <div className="dashboard-empty-icon">
-            <IconStore size={40} />
-          </div>
-          <h1 className="heading-2">Create your store</h1>
-          <p className="body-sm" style={{ maxWidth: 360, textAlign: 'center', marginTop: 'var(--space-2)' }}>
-            Set up your first store, add products, and start selling to customers.
-          </p>
-          <a href="/store/setup" className="btn btn-primary btn-lg" style={{ marginTop: 'var(--space-6)' }}>
-            <IconPlus size={18} />
-            Create Store
-          </a>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
+          <div className="spinner spinner-lg" />
         </div>
       </div>
     );

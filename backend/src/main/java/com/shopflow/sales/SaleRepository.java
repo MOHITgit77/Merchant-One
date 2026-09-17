@@ -23,4 +23,7 @@ public interface SaleRepository extends JpaRepository<Sale, UUID> {
 
     @Query("SELECT COALESCE(MAX(CAST(SUBSTRING(s.invoiceNumber, 5) AS int)), 0) FROM Sale s WHERE s.storeId = :storeId")
     int findMaxInvoiceNumber(@Param("storeId") UUID storeId);
+
+    @Query("SELECT COALESCE(MAX(CAST(SUBSTRING(s.invoiceNumber, 5) AS int)), 0) FROM Sale s")
+    int findMaxInvoiceNumberGlobal();
 }
