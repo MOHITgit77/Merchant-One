@@ -30,8 +30,8 @@ public class StorefrontController {
 
     @GetMapping("/{slug}")
     @Operation(summary = "Get published store by slug")
-    public ResponseEntity<ApiResponse<StoreDto>> getStore(@PathVariable String slug) {
-        StoreDto store = storefrontService.getPublishedStore(slug);
+    public ResponseEntity<ApiResponse<com.shopflow.storefront.dto.StorefrontStoreDto>> getStore(@PathVariable String slug) {
+        com.shopflow.storefront.dto.StorefrontStoreDto store = storefrontService.getPublishedStore(slug);
         return ResponseEntity.ok(ApiResponse.success(store));
     }
 

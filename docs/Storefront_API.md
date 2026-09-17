@@ -32,15 +32,16 @@ GET /api/storefront/my-shop
     "slug": "my-shop",
     "description": "The best shop in town",
     "logoUrl": "https://example.com/logo.png",
-    "contact": {
-      "phone": "+919876543210",
-      "email": "contact@myshop.com",
-      "address": "123 Main St"
-    },
-    "fulfillment": {
-      "pickupEnabled": true,
-      "deliveryEnabled": true
-    },
+    "coverImageUrl": null,
+    "phone": "+919876543210",
+    "email": "contact@myshop.com",
+    "address": "123 Main St",
+    "pickupEnabled": true,
+    "deliveryEnabled": true,
+    "deliveryRadius": 5.0,
+    "deliveryFee": 50.00,
+    "minimumOrder": 200.00,
+    "freeDeliveryThreshold": 1000.00,
     "paymentMethods": [
       "CASH",
       "UPI",

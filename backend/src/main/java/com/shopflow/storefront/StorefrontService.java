@@ -10,6 +10,8 @@ import com.shopflow.product.ProductService;
 import com.shopflow.product.dto.ProductDto;
 import com.shopflow.store.Store;
 import com.shopflow.store.StoreRepository;
+import com.shopflow.store.DeliverySettingsRepository;
+import com.shopflow.store.PaymentPreferenceRepository;
 import com.shopflow.store.dto.StoreDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,23 +30,60 @@ public class StorefrontService {
     private final ProductService productService;
     private final com.shopflow.order.OrderService orderService;
 
+    private final DeliverySettingsRepository deliverySettingsRepository;
+    private final PaymentPreferenceRepository paymentPreferenceRepository;
+
     public StorefrontService(StoreRepository storeRepository,
                              CategoryRepository categoryRepository,
                              ProductRepository productRepository,
                              ProductService productService,
-                             com.shopflow.order.OrderService orderService) {
+                             com.shopflow.order.OrderService orderService,
+                             DeliverySettingsRepository deliverySettingsRepository,
+                             PaymentPreferenceRepository paymentPreferenceRepository) {
         this.storeRepository = storeRepository;
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
         this.productService = productService;
         this.orderService = orderService;
+        this.deliverySettingsRepository = deliverySettingsRepository;
+        this.paymentPreferenceRepository = paymentPreferenceRepository;
     }
 
     @Transactional(readOnly = true)
-    public StoreDto getPublishedStore(String slug) {
+    public com.shopflow.storefront.dto.StorefrontStoreDto getPublishedStore(String slug) {
         Store store = storeRepository.findBySlugAndIsPublishedTrue(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("Store", "slug", slug));
-        return StoreDto.fromEntity(store);
+        
+        com.shopflow.storefront.dto.StorefrontStoreDto dto = new com.shopflow.storefront.dto.StorefrontStoreDto();
+        dto.setId(store.getId());
+        dto.setName(store.getName());
+        dto.setSlug(store.getSlug());
+        dto.setDescription(store.getDescription());
+        dto.setLogoUrl(store.getLogoUrl());
+        dto.setCoverImageUrl(store.getCoverImageUrl());
+        
+        dto.setPhone(store.getPhone());
+        dto.setEmail(store.getEmail());
+        dto.setAddress(store.getAddress());
+
+        dto.setPickupEnabled(store.isPickupEnabled());
+        
+        deliverySettingsRepository.findByStoreId(store.getId()).ifPresent(ds -> {
+            dto.setDeliveryEnabled(ds.isEnabled());
+            dto.setDeliveryRadius(ds.getDeliveryRadius());
+            dto.setDeliveryFee(ds.getDeliveryFee());
+            dto.setMinimumOrder(ds.getMinimumOrder());
+            dto.setFreeDeliveryThreshold(ds.getFreeDeliveryThreshold());
+        });
+
+        List<String> paymentMethods = paymentPreferenceRepository.findByStoreId(store.getId())
+            .stream()
+            .filter(com.shopflow.store.PaymentPreference::isEnabled)
+            .map(p -> p.getPaymentMethod().name())
+            .collect(Collectors.toList());
+        dto.setPaymentMethods(paymentMethods);
+
+        return dto;
     }
 
     @Transactional(readOnly = true)
