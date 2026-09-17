@@ -16,6 +16,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     Page<Product> findByStoreIdAndNameContainingIgnoreCase(UUID storeId, String name, Pageable pageable);
     Optional<Product> findByIdAndStoreId(UUID id, UUID storeId);
     List<Product> findByStoreIdAndCategoryIdAndIsActiveTrue(UUID storeId, UUID categoryId);
+    Page<Product> findByStoreIdAndCategoryIdAndIsActiveTrue(UUID storeId, UUID categoryId, Pageable pageable);
+    Optional<Product> findByIdAndStoreIdAndIsActiveTrue(UUID id, UUID storeId);
 
     @Query("SELECT COUNT(p) FROM Product p WHERE p.storeId = :storeId")
     long countByStoreId(@Param("storeId") UUID storeId);

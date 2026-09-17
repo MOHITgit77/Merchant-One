@@ -7,6 +7,7 @@ import com.shopflow.product.dto.ProductDto;
 import com.shopflow.store.dto.StoreDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -52,4 +53,23 @@ public class StorefrontController {
                 PageRequest.of(page, size, Sort.by("createdAt").descending()));
         return ResponseEntity.ok(PagedResponse.from(products));
     }
+
+    @GetMapping("/{slug}/products/{productId}")
+    @Operation(summary = "Get a specific product from a published store")
+    public ResponseEntity<ApiResponse<ProductDto>> getProduct(
+            @PathVariable String slug, @PathVariable UUID productId) {
+        ProductDto product = storefrontService.getPublicProduct(slug, productId);
+        return ResponseEntity.ok(ApiResponse.success(product));
+    }
+
+    @PostMapping("/{slug}/orders")
+    @Operation(summary = "Place a new customer order")
+    public ResponseEntity<ApiResponse<com.shopflow.order.dto.OrderDto>> createOrder(
+            @PathVariable String slug,
+            @Valid @RequestBody com.shopflow.order.dto.CreateOrderRequest request) {
+        com.shopflow.order.dto.OrderDto order = storefrontService.createCustomerOrder(slug, request);
+        return ResponseEntity.status(org.springframework.http.HttpStatus.CREATED)
+                .body(ApiResponse.success(order, "Order placed successfully"));
+    }
 }
+

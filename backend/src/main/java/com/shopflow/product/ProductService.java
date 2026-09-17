@@ -299,4 +299,62 @@ public class ProductService {
 
         return dto;
     }
+
+    /**
+     * Public-safe DTO that strips sensitive merchant fields (costPrice, reservedQuantity, lowStockThreshold, trackInventory)
+     */
+    public ProductDto toPublicDto(Product product) {
+        ProductDto dto = new ProductDto();
+        dto.setId(product.getId());
+        dto.setStoreId(product.getStoreId());
+        dto.setCategoryId(product.getCategoryId());
+        if (product.getCategoryId() != null) {
+            categoryRepository.findById(product.getCategoryId()).ifPresent(c -> dto.setCategoryName(c.getName()));
+        }
+        dto.setName(product.getName());
+        dto.setDescription(product.getDescription());
+        dto.setPrice(product.getPrice());
+        dto.setCompareAtPrice(product.getCompareAtPrice());
+        // costPrice intentionally omitted
+        dto.setTaxPercent(product.getTaxPercent());
+        dto.setUnit(product.getUnit());
+        dto.setActive(product.isActive());
+        dto.setHasVariants(product.isHasVariants());
+        // trackInventory and lowStockThreshold intentionally omitted
+        dto.setCreatedAt(product.getCreatedAt());
+        dto.setUpdatedAt(product.getUpdatedAt());
+
+        List<ProductDto.VariantDto> variantDtos = product.getVariants().stream()
+                .filter(ProductVariant::isActive)
+                .map(v -> {
+            ProductDto.VariantDto vd = new ProductDto.VariantDto();
+            vd.setId(v.getId());
+            vd.setName(v.getName());
+            vd.setSku(v.getSku());
+            vd.setPrice(v.getPrice());
+            // costPrice intentionally omitted
+            vd.setQuantityOnHand(v.getQuantityOnHand());
+            // reservedQuantity intentionally omitted
+            vd.setAvailableQuantity(v.getAvailableQuantity());
+            vd.setActive(v.isActive());
+            vd.setBarcode(v.getBarcode());
+            vd.setWeight(v.getWeight());
+            return vd;
+        }).collect(Collectors.toList());
+        dto.setVariants(variantDtos);
+        dto.setTotalStock(variantDtos.stream().mapToInt(ProductDto.VariantDto::getAvailableQuantity).sum());
+
+        List<ProductDto.ImageDto> imageDtos = product.getImages().stream().map(i -> {
+            ProductDto.ImageDto id = new ProductDto.ImageDto();
+            id.setId(i.getId());
+            id.setImageUrl(i.getImageUrl());
+            id.setDisplayOrder(i.getDisplayOrder());
+            id.setAltText(i.getAltText());
+            return id;
+        }).collect(Collectors.toList());
+        dto.setImages(imageDtos);
+
+        return dto;
+    }
+
 }

@@ -7,7 +7,9 @@ Merchant One is a modern, full-stack merchant management platform designed to st
 - **Store Management**: Easily configure store details, operating hours, delivery settings, and payment preferences.
 - **Product Catalogue**: Manage products, variants, pricing, and stock levels effortlessly.
 - **Inventory Tracking**: Keep track of stock movements, adjustments, and purchase batches with a full ledger system.
-- **Sales & POS**: Process new sales seamlessly with real-time inventory updates and receipt generation.
+- **Order Management**: Receive orders from customers, manage order lifecycle (Accept, Prepare, Ready, Complete, Cancel), with automated inventory reservation and deduction.
+- **Public Storefront APIs**: Expose public catalog and order creation endpoints for building customer-facing storefronts.
+- **Sales & POS**: Process direct in-store sales seamlessly with real-time inventory updates and receipt generation.
 - **Dynamic Dashboard**: View daily revenue, recent sales, and low-stock alerts at a glance.
 
 ## Technology Stack

@@ -26,13 +26,18 @@ public class StorefrontService {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
     private final ProductService productService;
+    private final com.shopflow.order.OrderService orderService;
 
-    public StorefrontService(StoreRepository storeRepository, CategoryRepository categoryRepository,
-                             ProductRepository productRepository, ProductService productService) {
+    public StorefrontService(StoreRepository storeRepository,
+                             CategoryRepository categoryRepository,
+                             ProductRepository productRepository,
+                             ProductService productService,
+                             com.shopflow.order.OrderService orderService) {
         this.storeRepository = storeRepository;
         this.categoryRepository = categoryRepository;
         this.productRepository = productRepository;
         this.productService = productService;
+        this.orderService = orderService;
     }
 
     @Transactional(readOnly = true)
@@ -57,10 +62,33 @@ public class StorefrontService {
                 .orElseThrow(() -> new ResourceNotFoundException("Store", "slug", slug));
         Page<Product> products;
         if (categoryId != null) {
-            products = productRepository.findByStoreIdAndCategoryId(store.getId(), categoryId, pageable);
+            products = productRepository.findByStoreIdAndCategoryIdAndIsActiveTrue(store.getId(), categoryId, pageable);
         } else {
             products = productRepository.findByStoreIdAndIsActiveTrue(store.getId(), pageable);
         }
-        return products.map(productService::toDto);
+        return products.map(productService::toPublicDto);
     }
+
+    @Transactional(readOnly = true)
+    public ProductDto getPublicProduct(String slug, java.util.UUID productId) {
+        Store store = storeRepository.findBySlugAndIsPublishedTrue(slug)
+                .orElseThrow(() -> new ResourceNotFoundException("Store", "slug", slug));
+        Product product = productRepository.findByIdAndStoreIdAndIsActiveTrue(productId, store.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
+        return productService.toPublicDto(product);
+    }
+
+    @Transactional
+    public com.shopflow.order.dto.OrderDto createCustomerOrder(String slug, com.shopflow.order.dto.CreateOrderRequest request) {
+        Store store = storeRepository.findBySlugAndIsPublishedTrue(slug)
+                .orElseThrow(() -> new ResourceNotFoundException("Store", "slug", slug));
+        
+        if (request.getOrderType() == com.shopflow.order.OrderType.PICKUP && !store.isPickupEnabled()) {
+            throw new com.shopflow.exception.BusinessRuleException("DELIVERY_ONLY", "Store does not support pickup");
+        }
+
+        return orderService.createOrder(store.getId(), request);
+    }
+
 }
+

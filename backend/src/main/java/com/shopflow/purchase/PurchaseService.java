@@ -2,7 +2,6 @@ package com.shopflow.purchase;
 
 import com.shopflow.exception.ResourceNotFoundException;
 import com.shopflow.inventory.InventoryService;
-import com.shopflow.inventory.dto.StockMovementRequest;
 import com.shopflow.product.Product;
 import com.shopflow.product.ProductVariant;
 import com.shopflow.product.ProductVariantRepository;
@@ -57,6 +56,10 @@ public class PurchaseService {
         purchase.setPurchaseDate(request.getPurchaseDate() != null ? request.getPurchaseDate() : LocalDate.now());
         purchase.setNotes(request.getNotes());
         purchase.setPerformedBy(merchantId);
+        purchase.setTotalAmount(BigDecimal.ZERO); // Temporary, updated below
+
+        // Save purchase first to get the ID for batch linkage
+        purchase = purchaseRepository.save(purchase);
 
         BigDecimal totalAmount = BigDecimal.ZERO;
 
@@ -86,20 +89,16 @@ public class PurchaseService {
             purchase.getItems().add(item);
             totalAmount = totalAmount.add(lineTotal);
 
-            // Stock in via inventory service
-            StockMovementRequest stockReq = new StockMovementRequest();
-            stockReq.setVariantId(variant.getId());
-            stockReq.setQuantity(itemReq.getQuantity());
-            stockReq.setUnitCost(itemReq.getUnitCost());
-            stockReq.setNotes("Purchase: " + purchase.getPurchaseNumber());
-            stockReq.setReferenceType("PURCHASE");
-            inventoryService.stockIn(storeId, stockReq, merchantId);
+            // Stock in via inventory service with PURCHASE movement type
+            inventoryService.stockInForPurchase(storeId, variant.getId(), itemReq.getQuantity(),
+                    itemReq.getUnitCost(), purchase.getId(), merchantId);
 
-            // Create batch record if batch number provided
+            // Create batch record if batch number provided — now with purchaseId
             if (itemReq.getBatchNumber() != null && !itemReq.getBatchNumber().isBlank()) {
                 Batch batch = new Batch();
                 batch.setStoreId(storeId);
                 batch.setVariantId(variant.getId());
+                batch.setPurchaseId(purchase.getId());
                 batch.setBatchNumber(itemReq.getBatchNumber());
                 batch.setQuantity(itemReq.getQuantity());
                 batch.setRemainingQuantity(itemReq.getQuantity());
@@ -112,15 +111,6 @@ public class PurchaseService {
 
         purchase.setTotalAmount(totalAmount);
         purchase = purchaseRepository.save(purchase);
-
-        // Backfill purchase ID on batches
-        UUID purchaseId = purchase.getId();
-        for (PurchaseItem item : purchase.getItems()) {
-            if (item.getBatchNumber() != null) {
-                // Link batch to purchase (last batch for this variant in this store)
-                // Already created above, no need for update since purchaseId wasn't set
-            }
-        }
 
         log.info("Purchase created: {} (₹{}) in store {}", purchase.getPurchaseNumber(), totalAmount, storeId);
         return toDto(purchase);

@@ -397,6 +397,38 @@ R=$(do_curl -X PATCH "$BASE/api/stores/$STORE_A/publish" -H "$AUTH_A"); assert_s
 echo -e "\n${YELLOW}19. OPENAPI${NC}"
 R=$(do_curl -X GET "$BASE/api-docs"); assert_status "OpenAPI docs" "200" "$(get_status "$R")"
 
+# ==== 20. ORDER MANAGEMENT ====
+echo -e "\n${YELLOW}20. ORDER MANAGEMENT${NC}"
+
+R=$(do_curl -X POST "$BASE/api/storefront/$SLUG_A/orders" -H "Content-Type: application/json" \
+  -d "{\"items\":[{\"variantId\":\"$VARIANT_A\",\"quantity\":1}],\"customerName\":\"Jane Smith\",\"customerPhone\":\"1234567890\",\"orderType\":\"PICKUP\",\"paymentMethod\":\"CASH\"}")
+B=$(get_body "$R"); S=$(get_status "$R")
+assert_status "Customer creates order" "201" "$S"
+assert_contains "Has order number" "$B" "ORD-"
+ORDER_ID=$(jval "$B" "['data']['id']")
+
+R=$(do_curl -X GET "$BASE/api/stores/$STORE_A/orders" -H "$AUTH_A")
+B=$(get_body "$R"); S=$(get_status "$R")
+assert_status "Merchant lists orders" "200" "$S"
+assert_contains "Order is PENDING" "$B" "PENDING"
+
+R=$(do_curl -X PATCH "$BASE/api/stores/$STORE_A/orders/$ORDER_ID/accept" -H "$AUTH_A")
+S=$(get_status "$R")
+assert_status "Merchant accepts order" "200" "$S"
+
+R=$(do_curl -X PATCH "$BASE/api/stores/$STORE_A/orders/$ORDER_ID/status" -H "$AUTH_A" -H "Content-Type: application/json" -d '{"status":"READY"}')
+S=$(get_status "$R")
+assert_status "Merchant marks order READY" "200" "$S"
+
+R=$(do_curl -X PATCH "$BASE/api/stores/$STORE_A/orders/$ORDER_ID/complete" -H "$AUTH_A")
+S=$(get_status "$R")
+assert_status "Merchant completes order" "200" "$S"
+
+# Verify stock deducted
+R=$(do_curl -X GET "$BASE/api/stores/$STORE_A/products/$PRODUCT_A" -H "$AUTH_A")
+STOCK=$(jval "$(get_body "$R")" "['data']['variants'][0]['quantityOnHand']")
+assert_eq "iPhone stock deducted to 47 (48 - 1 order)" "47" "$STOCK"
+
 # ==== RESULTS ====
 echo ""
 echo "============================================="
